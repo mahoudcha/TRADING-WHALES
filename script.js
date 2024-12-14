@@ -3,13 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const showChartButton = document.querySelector('.show-chart');
     const timeFrameButtons = document.querySelectorAll('.time-frame');
 
-    loadRecommendationsButton.addEventListener('click', () => {
-        alert('Loading recommendations...');
-    });
+    if (loadRecommendationsButton) {
+        loadRecommendationsButton.addEventListener('click', () => {
+            alert('Loading recommendations...');
+        });
+    }
 
-    showChartButton.addEventListener('click', () => {
-        alert('Showing chart...');
-    });
+    if (showChartButton) {
+        showChartButton.addEventListener('click', () => {
+            alert('Showing chart...');
+        });
+    }
 
     timeFrameButtons.forEach(button => {
         button.addEventListener('click', () => {
