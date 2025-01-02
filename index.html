@@ -3,32 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Whales - Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Trading Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: #1a1f2e;
+            color: white;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #131722;
+            padding: 20px;
+            border-right: 1px solid #2a2e39;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background-color: #2196f3;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .menu-item {
+            padding: 12px;
+            margin: 5px 0;
+            color: #9ca3af;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+
+        .menu-item:hover {
+            background-color: #2a2e39;
+            color: white;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .crypto-ticker {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 15px;
+            background-color: #131722;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .crypto-card {
+            background-color: #1e222d;
+            padding: 15px;
+            border-radius: 8px;
+            min-width: 150px;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stats-card {
+            background-color: #131722;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .chart-container {
+            background-color: #131722;
+            padding: 20px;
+            border-radius: 8px;
+            height: 400px;
+        }
+
+        .positive {
+            color: #4caf50;
+        }
+
+        .negative {
+            color: #f44336;
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e222d;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a2e39;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #363c4e;
+        }
+    </style>
 </head>
 <body>
     <div class="sidebar">
-        <img src="logo.png" alt="Logo" class="logo">
-        <div class="balance">$4281</div>
-        <nav>
-            <ul>
-                <li><a href="dashboard.html">Dashboard</a></li>
-                <li><a href="referrals.html">Referrals</a></li>
-                <li><a href="news.html">News</a></li>
-                <li><a href="deposit.html">Deposit</a></li>
-                <li><a href="trading-signals.html">Trading Signals</a></li>
-                <li><a href="api.html">API</a></li>
-                <li><a href="fill-your-tank.html">Fill Your Tank</a></li>
-                <li><a href="recommendations-bot.html">Recommendations Bot</a></li>
-                <li><a href="recommendations.html">Recommendations</a></li>
-                <li><a href="long-term-recommendations.html">Long Term Recommendations</a></li>
-            </ul>
-        </nav>
+        <div class="logo-container">
+            <div class="logo"></div>
+            <h2>Trading Bot</h2>
+        </div>
+        <a href="#" class="menu-item">Dashboard</a>
+        <a href="#" class="menu-item">My Account</a>
+        <a href="#" class="menu-item">Referrals</a>
+        <a href="#" class="menu-item">Deposit</a>
+        <a href="#" class="menu-item">Settings</a>
     </div>
+
     <div class="main-content">
-        <h1>Dashboard</h1>
-        <!-- Contenu de la page Dashboard -->
+        <div class="crypto-ticker" id="cryptoTicker"></div>
+        
+        <div class="stats-container">
+            <div class="stats-card">
+                <h3>Account Balance</h3>
+                <p class="balance">$0.00</p>
+            </div>
+            <div class="stats-card">
+                <h3>24h Trading Volume</h3>
+                <p class="volume">$0.00</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="tradingChart"></canvas>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        // Simuler les données des cryptomonnaies
+        const cryptos = [
+            { symbol: 'BTC', price: '47185.60', change: '+2.74' },
+            { symbol: 'ETH', price: '3493.00', change: '-2.95' },
+            { symbol: 'BNB', price: '711.56', change: '-0.55' },
+            { symbol: 'ADA', price: '0.9627', change: '+4.41' },
+            { symbol: 'DOGE', price: '0.34044', change: '+4.71' }
+        ];
+
+        // Afficher les cryptomonnaies
+        const ticker = document.getElementById('cryptoTicker');
+        cryptos.forEach(crypto => {
+            const card = document.createElement('div');
+            card.className = 'crypto-card';
+            const changeClass = parseFloat(crypto.change) >= 0 ? 'positive' : 'negative';
+            card.innerHTML = `
+                <div>${crypto.symbol}/USDT</div>
+                <div>$${crypto.price}</div>
+                <div class="${changeClass}">${crypto.change}%</div>
+            `;
+            ticker.appendChild(card);
+        });
+
+        // Créer le graphique
+        const ctx = document.getElementById('tradingChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: 20}, (_, i) => i),
+                datasets: [{
+                    label: 'BTC/USDT',
+                    data: Array.from({length: 20}, () => Math.random() * 1000 + 46000),
+                    borderColor: '#2196f3',
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: {
+                            color: '#2a2e39'
+                        },
+                        ticks: {
+                            color: '#9ca3af'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: '#2a2e39'
+                        },
+                        ticks: {
+                            color: '#9ca3af'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Mettre à jour les prix toutes les 5 secondes
+        setInterval(() => {
+            cryptos.forEach(crypto => {
+                crypto.price = (parseFloat(crypto.price) * (1 + (Math.random() - 0.5) * 0.01)).toFixed(2);
+                crypto.change = (parseFloat(crypto.change) + (Math.random() - 0.5)).toFixed(2);
+            });
+            
+            // Mettre à jour l'affichage
+            ticker.innerHTML = '';
+            cryptos.forEach(crypto => {
+                const card = document.createElement('div');
+                card.className = 'crypto-card';
+                const changeClass = parseFloat(crypto.change) >= 0 ? 'positive' : 'negative';
+                card.innerHTML = `
+                    <div>${crypto.symbol}/USDT</div>
+                    <div>$${crypto.price}</div>
+                    <div class="${changeClass}">${crypto.change}%</div>
+                `;
+                ticker.appendChild(card);
+            });
+        }, 5000);
+    </script>
 </body>
 </html>
